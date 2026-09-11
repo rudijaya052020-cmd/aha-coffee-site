@@ -1,0 +1,725 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AHA Coffee — Admin Panel</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@500;600&family=Jost:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --leather-dark:#2E1B10; --leather:#4A2C18;
+    --brass-hi:#F3D48C; --brass:#C99A45; --brass-dark:#6E4E1E;
+    --paper:#F6EEDD; --paper-deep:#ECE0C4; --paper-line:#D8C79E;
+    --ink:#2A1B10; --ink-soft:#5B4530; --copper:#A2602E;
+    --ok:#3E7A4B; --danger:#A23A2E;
+  }
+  *{ box-sizing:border-box; }
+  body{ margin:0; background:var(--paper-deep); color:var(--ink); font-family:'Jost',sans-serif; padding-bottom:120px; }
+  h1,h2,h3{ font-family:'Fraunces',serif; color:var(--ink); margin:0 0 6px; }
+  .topbar{
+    position:sticky; top:0; z-index:50;
+    background:linear-gradient(180deg,var(--leather),var(--leather-dark));
+    color:var(--paper); padding:16px 24px;
+    display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap;
+    box-shadow:0 6px 16px -8px rgba(0,0,0,0.5);
+  }
+  .topbar h1{ color:var(--paper); font-size:1.15rem; }
+  .topbar .sub{ font-size:0.75rem; color:var(--brass-hi); }
+  .topbar-actions{ display:flex; gap:10px; flex-wrap:wrap; }
+  .wrap{ max-width:920px; margin:0 auto; padding:24px; }
+  .note-box{
+    background:#FFF7E0; border:1px solid var(--brass); border-radius:8px;
+    padding:16px 18px; font-size:0.88rem; color:var(--ink-soft); margin-bottom:28px;
+  }
+  .note-box strong{ color:var(--ink); }
+  .card{
+    background:#FBF4E4; border:1px solid var(--paper-line); border-radius:10px;
+    padding:24px; margin-bottom:22px; box-shadow:0 8px 20px -14px rgba(42,27,16,0.4);
+  }
+  .card > h2{ font-size:1.1rem; border-bottom:2px solid var(--copper); padding-bottom:10px; margin-bottom:18px; display:inline-block; }
+  .field{ margin-bottom:16px; }
+  .field label{ display:block; font-size:0.78rem; letter-spacing:0.02em; color:var(--copper); margin-bottom:6px; font-weight:500; }
+  .field input[type=text], .field input[type=number], .field textarea{
+    width:100%; padding:10px 12px; border:1px solid var(--paper-line); border-radius:6px;
+    font-family:inherit; font-size:0.94rem; background:#fff; color:var(--ink);
+  }
+  .field textarea{ min-height:80px; resize:vertical; }
+  .grid2{ display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+  @media (max-width:640px){ .grid2{ grid-template-columns:1fr; } }
+  .item-box{
+    border:1px dashed var(--paper-line); border-radius:8px; padding:16px; margin-bottom:14px; background:#fff;
+    position:relative;
+  }
+  .item-box .item-head{ display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; }
+  .item-box .item-head span{ font-size:0.8rem; color:var(--copper); font-weight:600; }
+  .btn{
+    display:inline-flex; align-items:center; gap:6px; border:none; border-radius:6px;
+    padding:9px 16px; font-size:0.85rem; cursor:pointer; font-family:inherit;
+  }
+  .btn-brass{ background:linear-gradient(180deg,var(--brass-hi),var(--brass) 60%,var(--brass-dark)); color:#3B2408; font-weight:600; }
+  .btn-ghost{ background:#fff; border:1px solid var(--paper-line); color:var(--ink); }
+  .btn-danger{ background:#F6DCD6; color:var(--danger); }
+  .btn-save{ background:linear-gradient(180deg,#7FCF8E,var(--ok)); color:#fff; font-weight:600; }
+  .btn:active{ transform:translateY(1px); }
+  .img-preview{
+    width:100%; max-width:220px; aspect-ratio:4/3; object-fit:cover;
+    border:1px solid var(--paper-line); border-radius:6px; background:#eee; margin-bottom:10px; display:block;
+  }
+  .img-row{ display:flex; align-items:flex-start; gap:16px; flex-wrap:wrap; }
+  .img-row .img-controls{ flex:1; min-width:220px; }
+  .hint{ font-size:0.76rem; color:var(--ink-soft); margin-top:4px; }
+  .toast{
+    position:fixed; bottom:24px; left:50%; transform:translateX(-50%) translateY(20px);
+    background:var(--leather-dark); color:var(--paper); padding:12px 22px; border-radius:8px;
+    font-size:0.9rem; opacity:0; pointer-events:none; transition:opacity 0.25s ease, transform 0.25s ease;
+    box-shadow:0 10px 24px -10px rgba(0,0,0,0.6); z-index:200;
+  }
+  .toast.show{ opacity:1; transform:translateX(-50%) translateY(0); }
+  #lockScreen{
+    position:fixed; inset:0; background:var(--leather-dark); color:var(--paper);
+    display:flex; align-items:center; justify-content:center; z-index:500; flex-direction:column; gap:16px; padding:20px; text-align:center;
+  }
+  #lockScreen input{ padding:12px 16px; border-radius:6px; border:1px solid var(--brass); font-size:1rem; min-width:220px; text-align:center; }
+  #lockScreen .btn{ padding:12px 24px; }
+</style>
+</head>
+<body>
+
+<div id="lockScreen">
+  <h1 style="color:var(--paper)">AHA Coffee — Admin</h1>
+  <p style="max-width:360px; color:rgba(246,238,221,0.75); font-size:0.9rem;">Masukkan kode admin untuk masuk. (Kode ini tersimpan langsung di file admin.html — cocok untuk penggunaan pribadi, bukan pengaman tingkat tinggi.)</p>
+  <input type="password" id="lockInput" placeholder="Kode admin">
+  <button class="btn btn-brass" id="lockSubmit">Masuk</button>
+  <p id="lockError" style="color:#F6B4A4; font-size:0.82rem; display:none;">Kode salah, coba lagi.</p>
+</div>
+
+<div class="topbar">
+  <div>
+    <h1>AHA Coffee — Admin Panel</h1>
+    <div class="sub">Edit isi & gambar website tanpa buka kode</div>
+  </div>
+  <div class="topbar-actions">
+    <a class="btn btn-ghost" href="index.html" target="_blank">Lihat Website</a>
+    <button class="btn btn-ghost" id="exportBtn">Export Backup</button>
+    <button class="btn btn-ghost" id="importBtn">Import Backup</button>
+    <input type="file" id="importFile" accept="application/json" style="display:none">
+    <button class="btn btn-danger" id="resetBtn">Reset ke Default</button>
+    <button class="btn btn-save" id="saveBtn">💾 Simpan Perubahan</button>
+  </div>
+</div>
+
+<div class="wrap">
+  <div class="note-box">
+    <strong>Penting:</strong> klik <strong>Simpan Perubahan</strong> akan mengirim isi ini ke server dan otomatis tampil untuk <strong>SEMUA pengunjung</strong> (butuh sekitar 30-60 detik sampai live, karena website perlu di-build ulang). Untuk gambar produk/galeri/testimoni/logo yang direferensikan lewat nama file (bukan upload), pastikan file aslinya ada di folder <code>images/</code> dengan nama yang sama persis.
+  </div>
+
+  <div class="card">
+    <h2>Logo</h2>
+    <div id="logoField"></div>
+  </div>
+
+  <div class="card">
+    <h2>Hero (Bagian Atas)</h2>
+    <div id="heroFields"></div>
+  </div>
+
+  <div class="card">
+    <h2>Tentang / Mengapa AHA Coffee</h2>
+    <div id="aboutFields"></div>
+    <h3 style="font-size:0.95rem; margin-top:18px;">5 Poin Keunggulan</h3>
+    <div id="aboutValues"></div>
+  </div>
+
+  <div class="card">
+    <h2>Wedding Package</h2>
+    <div id="packagesIntroFields"></div>
+    <div id="packagesList"></div>
+  </div>
+
+  <div class="card">
+    <h2>Menu</h2>
+    <div id="menuIntroFields"></div>
+    <div id="menuImageField"></div>
+    <h3 style="font-size:0.95rem;">Coffee</h3>
+    <div id="menuCoffeeList"></div>
+    <button class="btn btn-ghost" id="addCoffeeBtn">+ Tambah Menu Coffee</button>
+    <h3 style="font-size:0.95rem; margin-top:18px;">Non-Coffee</h3>
+    <div id="menuNonCoffeeList"></div>
+    <button class="btn btn-ghost" id="addNonCoffeeBtn">+ Tambah Menu Non-Coffee</button>
+    <div class="field" style="margin-top:16px;">
+      <label>Catatan Menu</label>
+      <input type="text" id="menuNoteInput">
+    </div>
+    <div class="field">
+      <label>Catatan Kontak (ajakan tanya via WA/IG, muncul di bawah menu)</label>
+      <input type="text" id="menuContactNoteInput">
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Kunjungi Toko Kami</h2>
+    <div id="visitShopFields"></div>
+  </div>
+
+  <div class="card">
+    <h2>Make It Yours (Customize)</h2>
+    <div id="customizeFields"></div>
+    <h3 style="font-size:0.95rem; margin-top:18px;">Daftar Custom</h3>
+    <div id="customizeList"></div>
+    <button class="btn btn-ghost" id="addCustomizeBtn">+ Tambah Poin</button>
+  </div>
+
+  <div class="card">
+    <h2>Galeri</h2>
+    <div id="galleryIntroFields"></div>
+    <div id="galleryList"></div>
+    <button class="btn btn-ghost" id="addGalleryBtn">+ Tambah Foto Galeri</button>
+  </div>
+
+  <div class="card">
+    <h2>Testimoni</h2>
+    <div id="testiIntroFields"></div>
+    <div id="testiList"></div>
+    <button class="btn btn-ghost" id="addTestiBtn">+ Tambah Foto Testimoni</button>
+  </div>
+
+  <div class="card">
+    <h2>Alur Pemesanan</h2>
+    <div id="stepsIntroFields"></div>
+    <div id="stepsList"></div>
+  </div>
+
+  <div class="card">
+    <h2>FAQ</h2>
+    <div id="faqIntroFields"></div>
+    <div id="faqList"></div>
+    <button class="btn btn-ghost" id="addFaqBtn">+ Tambah FAQ</button>
+  </div>
+
+  <div class="card">
+    <h2>Booking & Kontak</h2>
+    <div id="bookingFields"></div>
+  </div>
+
+  <div class="card">
+    <h2>Footer</h2>
+    <div id="footerFields"></div>
+  </div>
+
+  <button class="btn btn-save" id="saveBtnBottom" style="width:100%; padding:16px; font-size:1rem;">💾 Simpan Semua Perubahan</button>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="content.js"></script>
+<script>
+(function(){
+  const ADMIN_PASSWORD = "ahacoffee123"; // ganti sesuai keinginan kamu
+
+  // ---------- lock screen ----------
+  const lockScreen = document.getElementById('lockScreen');
+  const lockInput = document.getElementById('lockInput');
+  const lockSubmit = document.getElementById('lockSubmit');
+  const lockError = document.getElementById('lockError');
+  function tryUnlock(){
+    if (lockInput.value === ADMIN_PASSWORD){ lockScreen.style.display = 'none'; }
+    else { lockError.style.display = 'block'; }
+  }
+  lockSubmit.addEventListener('click', tryUnlock);
+  lockInput.addEventListener('keydown', e => { if(e.key === 'Enter') tryUnlock(); });
+
+  // ---------- state ----------
+  let content = window.getAhaContent();
+
+  function toast(msg){
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    setTimeout(()=> t.classList.remove('show'), 2200);
+  }
+
+  function fieldHTML(labelText, valuePath, value, type){
+    type = type || 'text';
+    const idAttr = 'f_' + valuePath.replace(/[\.\[\]]/g,'_');
+    if (type === 'textarea'){
+      return `<div class="field"><label>${labelText}</label><textarea data-path="${valuePath}">${value || ''}</textarea></div>`;
+    }
+    return `<div class="field"><label>${labelText}</label><input type="text" data-path="${valuePath}" value="${(value||'').toString().replace(/"/g,'&quot;')}"></div>`;
+  }
+
+  // generic: get/set nested value by path like "hero.title" or "packages.0.name"
+  function getPath(obj, path){
+    return path.split('.').reduce((o,k)=> (o == null ? o : o[k]), obj);
+  }
+  function setPath(obj, path, value){
+    const parts = path.split('.');
+    let cur = obj;
+    for (let i=0;i<parts.length-1;i++){ cur = cur[parts[i]]; }
+    cur[parts[parts.length-1]] = value;
+  }
+
+  function bindInputs(container){
+    container.querySelectorAll('[data-path]').forEach(el=>{
+      el.addEventListener('input', ()=>{
+        setPath(content, el.dataset.path, el.value);
+      });
+    });
+  }
+
+  function imageFieldHTML(path, currentSrc, label){
+    return `
+      <div class="img-row">
+        <div>
+          <img class="img-preview" src="${currentSrc}" onerror="this.style.opacity=0.3" alt="preview">
+        </div>
+        <div class="img-controls">
+          <div class="field">
+            <label>${label} — path file (di folder images/) atau upload di bawah</label>
+            <input type="text" data-path="${path}" value="${(currentSrc||'').toString().replace(/"/g,'&quot;')}">
+          </div>
+          <input type="file" accept="image/*" data-image-path="${path}">
+          <p class="hint">Upload di sini akan menyimpan gambar langsung ke penyimpanan browser (base64) — cocok untuk uji coba cepat. Untuk hasil paling stabil jangka panjang, taruh file aslinya di folder images/ lalu isi nama filenya di kolom path di atas.</p>
+        </div>
+      </div>`;
+  }
+
+  function bindImageInputs(container, onChangeRerender){
+    container.querySelectorAll('input[type=file][data-image-path]').forEach(el=>{
+      el.addEventListener('change', (e)=>{
+        const file = e.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = function(ev){
+          setPath(content, el.dataset.imagePath, ev.target.result);
+          onChangeRerender();
+        };
+        reader.readAsDataURL(file);
+      });
+    });
+  }
+
+  // ---------- Logo ----------
+  function renderLogo(){
+    const el = document.getElementById('logoField');
+    el.innerHTML = imageFieldHTML('logo', content.logo, 'Logo');
+    bindInputs(el);
+    bindImageInputs(el, renderLogo);
+  }
+
+  // ---------- Hero ----------
+  function renderHero(){
+    const el = document.getElementById('heroFields');
+    let html = '';
+    html += fieldHTML('Eyebrow (teks kecil di atas judul)', 'hero.eyebrow', content.hero.eyebrow);
+    html += fieldHTML('Judul Utama', 'hero.title', content.hero.title, 'textarea');
+    html += fieldHTML('Deskripsi (lede)', 'hero.lede', content.hero.lede, 'textarea');
+    html += imageFieldHTML('hero.image', content.hero.image, 'Foto Hero');
+    html += '<div class="grid2">';
+    html += fieldHTML('Tag — judul kecil (mis. "A Little Sip")', 'hero.tagTitle', content.hero.tagTitle);
+    html += fieldHTML('Tag — subjudul', 'hero.tagSubtitle', content.hero.tagSubtitle);
+    html += '</div>';
+    html += '<h3 style="font-size:0.95rem; margin-top:14px;">Statistik (3 kotak)</h3>';
+    content.hero.stats.forEach((s,i)=>{
+      html += `<div class="item-box"><div class="grid2">
+        ${fieldHTML('Angka', `hero.stats.${i}.value`, s.value)}
+        ${fieldHTML('Label', `hero.stats.${i}.label`, s.label)}
+      </div></div>`;
+    });
+    el.innerHTML = html;
+    bindInputs(el);
+    bindImageInputs(el, renderHero);
+  }
+
+  // ---------- About ----------
+  function renderAbout(){
+    const el = document.getElementById('aboutFields');
+    let html = '';
+    html += fieldHTML('Kicker', 'about.kicker', content.about.kicker);
+    html += fieldHTML('Judul', 'about.title', content.about.title, 'textarea');
+    html += fieldHTML('Deskripsi', 'about.desc', content.about.desc, 'textarea');
+    el.innerHTML = html;
+    bindInputs(el);
+
+    const vEl = document.getElementById('aboutValues');
+    vEl.innerHTML = content.about.values.map((v,i)=>`
+      <div class="item-box">
+        <div class="item-head"><span>Poin ${i+1}</span></div>
+        ${fieldHTML('Judul', `about.values.${i}.title`, v.title)}
+        ${fieldHTML('Deskripsi', `about.values.${i}.desc`, v.desc, 'textarea')}
+      </div>`).join('');
+    bindInputs(vEl);
+  }
+
+  // ---------- Packages ----------
+  function renderPackagesIntro(){
+    const el = document.getElementById('packagesIntroFields');
+    el.innerHTML =
+      fieldHTML('Kicker', 'packagesIntro.kicker', content.packagesIntro.kicker) +
+      fieldHTML('Judul', 'packagesIntro.title', content.packagesIntro.title, 'textarea') +
+      fieldHTML('Deskripsi', 'packagesIntro.desc', content.packagesIntro.desc, 'textarea');
+    bindInputs(el);
+  }
+  function renderPackages(){
+    const el = document.getElementById('packagesList');
+    el.innerHTML = content.packages.map((p,i)=>`
+      <div class="item-box">
+        <div class="item-head"><span>Paket ${i+1}</span>
+          <button class="btn btn-danger" data-remove-package="${i}">Hapus Paket</button>
+        </div>
+        <div class="grid2">
+          ${fieldHTML('Nama Paket', `packages.${i}.name`, p.name)}
+          ${fieldHTML('Jumlah Cup', `packages.${i}.cups`, p.cups)}
+        </div>
+        ${fieldHTML('Deskripsi Singkat', `packages.${i}.desc`, p.desc, 'textarea')}
+        <div class="field">
+          <label>Isi Paket (satu baris = satu item)</label>
+          <textarea data-list-path="packages.${i}.includes">${p.includes.join('\n')}</textarea>
+        </div>
+        ${fieldHTML('Teks Tombol', `packages.${i}.cta`, p.cta)}
+      </div>`).join('') + `<button class="btn btn-ghost" id="addPackageBtn">+ Tambah Paket</button>`;
+    bindInputs(el);
+    bindListTextareas(el);
+    el.querySelectorAll('[data-remove-package]').forEach(btn=>{
+      btn.addEventListener('click', ()=>{
+        const idx = parseInt(btn.dataset.removePackage,10);
+        content.packages.splice(idx,1);
+        renderPackages();
+      });
+    });
+    const addBtn = document.getElementById('addPackageBtn');
+    if (addBtn) addBtn.addEventListener('click', ()=>{
+      content.packages.push({ name:"Paket Baru", cups:"", desc:"", includes:["Item 1"], cta:"Book This Package" });
+      renderPackages();
+    });
+  }
+
+  function bindListTextareas(container){
+    container.querySelectorAll('[data-list-path]').forEach(el=>{
+      el.addEventListener('input', ()=>{
+        const lines = el.value.split('\n').map(s=>s.trim()).filter(s=>s.length>0);
+        setPath(content, el.dataset.listPath, lines);
+      });
+    });
+  }
+
+  // ---------- Menu ----------
+  function renderMenuIntro(){
+    const el = document.getElementById('menuIntroFields');
+    el.innerHTML =
+      fieldHTML('Kicker', 'menu.kicker', content.menu.kicker) +
+      fieldHTML('Judul', 'menu.title', content.menu.title);
+    bindInputs(el);
+    document.getElementById('menuNoteInput').value = content.menu.note || '';
+    document.getElementById('menuNoteInput').addEventListener('input', (e)=>{ content.menu.note = e.target.value; });
+    document.getElementById('menuContactNoteInput').value = content.menu.contactNote || '';
+    document.getElementById('menuContactNoteInput').addEventListener('input', (e)=>{ content.menu.contactNote = e.target.value; });
+  }
+  function renderMenuImage(){
+    const el = document.getElementById('menuImageField');
+    el.innerHTML = imageFieldHTML('menu.image', content.menu.image, 'Foto di Sebelah Menu');
+    bindInputs(el);
+    bindImageInputs(el, renderMenuImage);
+  }
+  function renderVisitShop(){
+    const el = document.getElementById('visitShopFields');
+    el.innerHTML =
+      fieldHTML('Kicker', 'visitShop.kicker', content.visitShop.kicker) +
+      fieldHTML('Judul', 'visitShop.title', content.visitShop.title, 'textarea') +
+      fieldHTML('Deskripsi', 'visitShop.desc', content.visitShop.desc, 'textarea') +
+      imageFieldHTML('visitShop.image', content.visitShop.image, 'Foto Suasana Toko') +
+      fieldHTML('Alamat Toko', 'visitShop.address', content.visitShop.address, 'textarea') +
+      fieldHTML('Jam Buka', 'visitShop.hours', content.visitShop.hours) +
+      fieldHTML('Link Google Maps (opsional — kosongkan kalau belum ada)', 'visitShop.mapUrl', content.visitShop.mapUrl) +
+      fieldHTML('Teks Tombol Maps', 'visitShop.ctaMap', content.visitShop.ctaMap);
+    bindInputs(el);
+    bindImageInputs(el, renderVisitShop);
+  }
+  function renderMenuList(key, containerId){
+    const el = document.getElementById(containerId);
+    el.innerHTML = content.menu[key].map((m,i)=>`
+      <div class="item-box">
+        <div class="item-head"><span>${key === 'coffee' ? 'Coffee' : 'Non-Coffee'} ${i+1}</span>
+          <button class="btn btn-danger" data-remove-menu="${key}:${i}">Hapus</button>
+        </div>
+        <div class="grid2">
+          ${fieldHTML('Nama Menu', `menu.${key}.${i}.name`, m.name)}
+          ${fieldHTML('Tag', `menu.${key}.${i}.tag`, m.tag)}
+        </div>
+      </div>`).join('');
+    bindInputs(el);
+    el.querySelectorAll('[data-remove-menu]').forEach(btn=>{
+      btn.addEventListener('click', ()=>{
+        const [k,idx] = btn.dataset.removeMenu.split(':');
+        content.menu[k].splice(parseInt(idx,10),1);
+        renderMenuList(k, k === 'coffee' ? 'menuCoffeeList' : 'menuNonCoffeeList');
+      });
+    });
+  }
+
+  // ---------- Customize ----------
+  function renderCustomize(){
+    const el = document.getElementById('customizeFields');
+    el.innerHTML =
+      fieldHTML('Kicker', 'customize.kicker', content.customize.kicker) +
+      fieldHTML('Judul', 'customize.title', content.customize.title) +
+      fieldHTML('Deskripsi', 'customize.desc', content.customize.desc, 'textarea') +
+      imageFieldHTML('customize.image', content.customize.image, 'Foto Customize');
+    bindInputs(el);
+    bindImageInputs(el, renderCustomize);
+  }
+  function renderCustomizeList(){
+    const el = document.getElementById('customizeList');
+    el.innerHTML = content.customize.items.map((item,i)=>`
+      <div class="item-box">
+        <div class="item-head"><span>Poin ${i+1}</span>
+          <button class="btn btn-danger" data-remove-custom="${i}">Hapus</button>
+        </div>
+        <div class="field"><input type="text" data-path="customize.items.${i}" value="${item.replace(/"/g,'&quot;')}"></div>
+      </div>`).join('');
+    bindInputs(el);
+    el.querySelectorAll('[data-remove-custom]').forEach(btn=>{
+      btn.addEventListener('click', ()=>{
+        content.customize.items.splice(parseInt(btn.dataset.removeCustom,10),1);
+        renderCustomizeList();
+      });
+    });
+  }
+
+  // ---------- Gallery ----------
+  function renderGalleryIntro(){
+    const el = document.getElementById('galleryIntroFields');
+    el.innerHTML = fieldHTML('Kicker', 'galleryIntro.kicker', content.galleryIntro.kicker) +
+      fieldHTML('Judul', 'galleryIntro.title', content.galleryIntro.title);
+    bindInputs(el);
+  }
+  function renderGalleryList(){
+    const el = document.getElementById('galleryList');
+    el.innerHTML = content.gallery.map((g,i)=>`
+      <div class="item-box">
+        <div class="item-head"><span>Foto ${i+1}</span>
+          <button class="btn btn-danger" data-remove-gallery="${i}">Hapus</button>
+        </div>
+        ${imageFieldHTML(`gallery.${i}.image`, g.image, 'Gambar')}
+        ${fieldHTML('Alt text (deskripsi gambar)', `gallery.${i}.alt`, g.alt)}
+      </div>`).join('');
+    bindInputs(el);
+    bindImageInputs(el, renderGalleryList);
+    el.querySelectorAll('[data-remove-gallery]').forEach(btn=>{
+      btn.addEventListener('click', ()=>{
+        content.gallery.splice(parseInt(btn.dataset.removeGallery,10),1);
+        renderGalleryList();
+      });
+    });
+  }
+
+  // ---------- Testimonials ----------
+  function renderTestiIntro(){
+    const el = document.getElementById('testiIntroFields');
+    el.innerHTML = fieldHTML('Kicker', 'testimonialsIntro.kicker', content.testimonialsIntro.kicker) +
+      fieldHTML('Judul', 'testimonialsIntro.title', content.testimonialsIntro.title) +
+      fieldHTML('Deskripsi', 'testimonialsIntro.desc', content.testimonialsIntro.desc, 'textarea');
+    bindInputs(el);
+  }
+  function renderTestiList(){
+    const el = document.getElementById('testiList');
+    el.innerHTML = content.testimonials.map((t,i)=>`
+      <div class="item-box">
+        <div class="item-head"><span>Testimoni ${i+1}</span>
+          <button class="btn btn-danger" data-remove-testi="${i}">Hapus</button>
+        </div>
+        ${imageFieldHTML(`testimonials.${i}.image`, t.image, 'Gambar Screenshot')}
+        ${fieldHTML('Alt text (deskripsi gambar)', `testimonials.${i}.alt`, t.alt)}
+      </div>`).join('');
+    bindInputs(el);
+    bindImageInputs(el, renderTestiList);
+    el.querySelectorAll('[data-remove-testi]').forEach(btn=>{
+      btn.addEventListener('click', ()=>{
+        content.testimonials.splice(parseInt(btn.dataset.removeTesti,10),1);
+        renderTestiList();
+      });
+    });
+  }
+
+  // ---------- Steps ----------
+  function renderStepsIntro(){
+    const el = document.getElementById('stepsIntroFields');
+    el.innerHTML = fieldHTML('Kicker', 'stepsIntro.kicker', content.stepsIntro.kicker) +
+      fieldHTML('Judul', 'stepsIntro.title', content.stepsIntro.title);
+    bindInputs(el);
+  }
+  function renderStepsList(){
+    const el = document.getElementById('stepsList');
+    el.innerHTML = content.steps.map((s,i)=>`
+      <div class="item-box">
+        <div class="item-head"><span>Langkah ${i+1}</span></div>
+        ${fieldHTML('Judul', `steps.${i}.title`, s.title)}
+        ${fieldHTML('Deskripsi', `steps.${i}.desc`, s.desc, 'textarea')}
+      </div>`).join('');
+    bindInputs(el);
+  }
+
+  // ---------- FAQ ----------
+  function renderFaqIntro(){
+    const el = document.getElementById('faqIntroFields');
+    el.innerHTML = fieldHTML('Kicker', 'faqIntro.kicker', content.faqIntro.kicker) +
+      fieldHTML('Judul', 'faqIntro.title', content.faqIntro.title);
+    bindInputs(el);
+  }
+  function renderFaqList(){
+    const el = document.getElementById('faqList');
+    el.innerHTML = content.faq.map((f,i)=>`
+      <div class="item-box">
+        <div class="item-head"><span>FAQ ${i+1}</span>
+          <button class="btn btn-danger" data-remove-faq="${i}">Hapus</button>
+        </div>
+        ${fieldHTML('Pertanyaan', `faq.${i}.q`, f.q, 'textarea')}
+        ${fieldHTML('Jawaban', `faq.${i}.a`, f.a, 'textarea')}
+      </div>`).join('');
+    bindInputs(el);
+    el.querySelectorAll('[data-remove-faq]').forEach(btn=>{
+      btn.addEventListener('click', ()=>{
+        content.faq.splice(parseInt(btn.dataset.removeFaq,10),1);
+        renderFaqList();
+      });
+    });
+  }
+
+  // ---------- Booking ----------
+  function renderBooking(){
+    const el = document.getElementById('bookingFields');
+    el.innerHTML =
+      fieldHTML('Kicker', 'booking.kicker', content.booking.kicker) +
+      fieldHTML('Judul', 'booking.title', content.booking.title) +
+      fieldHTML('Deskripsi', 'booking.lede', content.booking.lede, 'textarea') +
+      '<div class="grid2">' +
+      fieldHTML('WhatsApp (teks tampilan, mis. 0812-xxxx-xxxx)', 'booking.whatsapp', content.booking.whatsapp) +
+      fieldHTML('WhatsApp Link (mis. https://wa.me/62812xxxxxxx)', 'booking.whatsappLink', content.booking.whatsappLink) +
+      '</div>' +
+      '<div class="grid2">' +
+      fieldHTML('Instagram — teks tampilan (mis. @ahacoffee.id)', 'booking.instagramHandle', content.booking.instagramHandle) +
+      fieldHTML('Instagram — link profil', 'booking.instagramUrl', content.booking.instagramUrl) +
+      '</div>' +
+      fieldHTML('Link Toko Shopee', 'booking.shopeeUrl', content.booking.shopeeUrl) +
+      '<div class="grid2">' +
+      fieldHTML('Email', 'booking.email', content.booking.email) +
+      fieldHTML('Area Layanan', 'booking.area', content.booking.area) +
+      '</div>';
+    bindInputs(el);
+  }
+
+  // ---------- Footer ----------
+  function renderFooter(){
+    const el = document.getElementById('footerFields');
+    el.innerHTML =
+      fieldHTML('Tagline', 'footer.tagline', content.footer.tagline, 'textarea') +
+      `<div class="field"><label>Layanan Acara (satu baris = satu item)</label>
+        <textarea data-list-path="footer.services">${content.footer.services.join('\n')}</textarea></div>` +
+      fieldHTML('Teks Copyright', 'footer.note', content.footer.note) +
+      fieldHTML('Sub Note', 'footer.subNote', content.footer.subNote);
+    bindInputs(el);
+    bindListTextareas(el);
+  }
+
+  // ---------- add buttons for menu/customize/gallery/testi/faq ----------
+  document.getElementById('addCoffeeBtn').addEventListener('click', ()=>{
+    content.menu.coffee.push({ name:"Menu Baru", tag:"" });
+    renderMenuList('coffee','menuCoffeeList');
+  });
+  document.getElementById('addNonCoffeeBtn').addEventListener('click', ()=>{
+    content.menu.nonCoffee.push({ name:"Menu Baru", tag:"" });
+    renderMenuList('nonCoffee','menuNonCoffeeList');
+  });
+  document.getElementById('addCustomizeBtn').addEventListener('click', ()=>{
+    content.customize.items.push("Poin baru");
+    renderCustomizeList();
+  });
+  document.getElementById('addGalleryBtn').addEventListener('click', ()=>{
+    content.gallery.push({ image:"images/nama-file.jpg", alt:"" });
+    renderGalleryList();
+  });
+  document.getElementById('addTestiBtn').addEventListener('click', ()=>{
+    content.testimonials.push({ image:"images/nama-file.jpg", alt:"" });
+    renderTestiList();
+  });
+  document.getElementById('addFaqBtn').addEventListener('click', ()=>{
+    content.faq.push({ q:"Pertanyaan baru?", a:"Jawaban." });
+    renderFaqList();
+  });
+
+  // ---------- save / reset / export / import ----------
+  function saveAll(){
+    toast('Menyimpan ke server...');
+    window.saveAhaContent(content, ADMIN_PASSWORD).then(function(){
+      toast('Tersimpan! Website akan update untuk semua pengunjung dalam ~30-60 detik.');
+    }).catch(function(err){
+      alert('Gagal menyimpan ke server: ' + err.message + '\n\nPerubahan tetap tersimpan sementara di browser ini (klik Simpan lagi setelah masalahnya diperbaiki).');
+    });
+  }
+  document.getElementById('saveBtn').addEventListener('click', saveAll);
+  document.getElementById('saveBtnBottom').addEventListener('click', saveAll);
+
+  document.getElementById('resetBtn').addEventListener('click', ()=>{
+    if (confirm('Yakin mau reset semua konten ke default? Perubahan yang belum di-export akan hilang.')){
+      localStorage.removeItem(window.AHA_STORAGE_KEY);
+      content = JSON.parse(JSON.stringify(window.AHA_DEFAULT_CONTENT));
+      renderAll();
+      toast('Konten dikembalikan ke default (belum disimpan — klik Simpan untuk mengunci perubahan ini).');
+    }
+  });
+
+  document.getElementById('exportBtn').addEventListener('click', ()=>{
+    const blob = new Blob([JSON.stringify(content, null, 2)], { type:'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = 'aha-coffee-backup.json';
+    a.click();
+    URL.revokeObjectURL(url);
+  });
+  document.getElementById('importBtn').addEventListener('click', ()=> document.getElementById('importFile').click());
+  document.getElementById('importFile').addEventListener('change', (e)=>{
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = function(ev){
+      try{
+        content = JSON.parse(ev.target.result);
+        renderAll();
+        toast('Backup berhasil dimuat. Klik Simpan untuk mengunci perubahan ini.');
+      }catch(err){
+        alert('File backup tidak valid.');
+      }
+    };
+    reader.readAsText(file);
+  });
+
+  function renderAll(){
+    renderLogo();
+    renderHero();
+    renderAbout();
+    renderPackagesIntro();
+    renderPackages();
+    renderMenuIntro();
+    renderMenuImage();
+    renderMenuList('coffee','menuCoffeeList');
+    renderMenuList('nonCoffee','menuNonCoffeeList');
+    renderVisitShop();
+    renderCustomize();
+    renderCustomizeList();
+    renderGalleryIntro();
+    renderGalleryList();
+    renderTestiIntro();
+    renderTestiList();
+    renderStepsIntro();
+    renderStepsList();
+    renderFaqIntro();
+    renderFaqList();
+    renderBooking();
+    renderFooter();
+  }
+
+  renderAll();
+})();
+</script>
+</body>
+</html>
