@@ -103,17 +103,17 @@ window.AHA_DEFAULT_CONTENT = {
   menu: {
     kicker: "Choose Your Favorite",
     title: "Menu yang disukai banyak tamu.",
-    image: "images/aha-brand-arabica-matcha.jpg",
+    showPrices: true,
     coffee: [
-      { name: "Kopi Susu Gula Aren", tag: "Signature favorit" },
-      { name: "Coffee Latte", tag: "Klasik & lembut" },
-      { name: "Cappuccino", tag: "Creamy foam" },
-      { name: "Signature Coffee", tag: "Racikan khusus AHA" }
+      { name: "Kopi Susu Gula Aren", tag: "Signature favorit", price: "Rp 18.000", image: "images/aha-brand-arabica-matcha.jpg", active: true },
+      { name: "Coffee Latte", tag: "Klasik & lembut", price: "Rp 18.000", image: "", active: true },
+      { name: "Cappuccino", tag: "Creamy foam", price: "Rp 18.000", image: "", active: true },
+      { name: "Signature Coffee", tag: "Racikan khusus AHA", price: "Rp 20.000", image: "", active: true }
     ],
     nonCoffee: [
-      { name: "Matcha", tag: "Segar & earthy" },
-      { name: "Thai Tea", tag: "Manis gurih" },
-      { name: "Signature Non-Coffee", tag: "Racikan khusus AHA" }
+      { name: "Matcha", tag: "Segar & earthy", price: "Rp 18.000", image: "", active: true },
+      { name: "Thai Tea", tag: "Manis gurih", price: "Rp 18.000", image: "", active: true },
+      { name: "Signature Non-Coffee", tag: "Racikan khusus AHA", price: "Rp 20.000", image: "", active: true }
     ],
     note: "Menu dapat disesuaikan dengan paket dan kebutuhan acara Anda.",
     contactNote: "Ada pertanyaan soal menu atau rasa? Tanya langsung lewat WhatsApp atau Instagram kami."
@@ -141,6 +141,7 @@ window.AHA_DEFAULT_CONTENT = {
     address: "Isi alamat toko AHA Coffee di sini",
     hours: "Setiap hari, 09.00 – 21.00 WIB",
     mapUrl: "",
+    mapEmbedUrl: "",
     ctaMap: "Lihat Lokasi di Maps"
   },
 

@@ -140,7 +140,10 @@
   <div class="card">
     <h2>Menu</h2>
     <div id="menuIntroFields"></div>
-    <div id="menuImageField"></div>
+    <div class="field" style="margin-top:12px;">
+      <label><input type="checkbox" id="menuShowPricesInput" style="width:auto; margin-right:8px;">Tampilkan harga di website</label>
+      <p class="hint">Kalau di-uncheck, semua harga menu disembunyikan dari tampilan publik (nama & foto menu tetap tampil).</p>
+    </div>
     <h3 style="font-size:0.95rem;">Coffee</h3>
     <div id="menuCoffeeList"></div>
     <button class="btn btn-ghost" id="addCoffeeBtn">+ Tambah Menu Coffee</button>
@@ -414,12 +417,9 @@
     document.getElementById('menuNoteInput').addEventListener('input', (e)=>{ content.menu.note = e.target.value; });
     document.getElementById('menuContactNoteInput').value = content.menu.contactNote || '';
     document.getElementById('menuContactNoteInput').addEventListener('input', (e)=>{ content.menu.contactNote = e.target.value; });
-  }
-  function renderMenuImage(){
-    const el = document.getElementById('menuImageField');
-    el.innerHTML = imageFieldHTML('menu.image', content.menu.image, 'Foto di Sebelah Menu');
-    bindInputs(el);
-    bindImageInputs(el, renderMenuImage);
+    const showPricesInput = document.getElementById('menuShowPricesInput');
+    showPricesInput.checked = content.menu.showPrices !== false;
+    showPricesInput.addEventListener('change', (e)=>{ content.menu.showPrices = e.target.checked; });
   }
   function renderVisitShop(){
     const el = document.getElementById('visitShopFields');
@@ -431,7 +431,9 @@
       fieldHTML('Alamat Toko', 'visitShop.address', content.visitShop.address, 'textarea') +
       fieldHTML('Jam Buka', 'visitShop.hours', content.visitShop.hours) +
       fieldHTML('Link Google Maps (opsional — kosongkan kalau belum ada)', 'visitShop.mapUrl', content.visitShop.mapUrl) +
-      fieldHTML('Teks Tombol Maps', 'visitShop.ctaMap', content.visitShop.ctaMap);
+      fieldHTML('Teks Tombol Maps', 'visitShop.ctaMap', content.visitShop.ctaMap) +
+      fieldHTML('Link Embed Google Maps (peta yang muncul langsung di halaman — lihat catatan di bawah)', 'visitShop.mapEmbedUrl', content.visitShop.mapEmbedUrl, 'textarea');
+    el.innerHTML += '<p class="hint">Cara dapetin Link Embed: buka Google Maps → cari lokasi toko → Share → tab "Embed a map" → Copy HTML → tempel di sini, tapi ambil bagian di dalam tanda kutip setelah src= saja (yang diawali https://www.google.com/maps/embed...).</p>';
     bindInputs(el);
     bindImageInputs(el, renderVisitShop);
   }
@@ -442,12 +444,26 @@
         <div class="item-head"><span>${key === 'coffee' ? 'Coffee' : 'Non-Coffee'} ${i+1}</span>
           <button class="btn btn-danger" data-remove-menu="${key}:${i}">Hapus</button>
         </div>
+        ${imageFieldHTML(`menu.${key}.${i}.image`, m.image, 'Foto Menu')}
         <div class="grid2">
           ${fieldHTML('Nama Menu', `menu.${key}.${i}.name`, m.name)}
           ${fieldHTML('Tag', `menu.${key}.${i}.tag`, m.tag)}
         </div>
+        <div class="grid2">
+          ${fieldHTML('Harga (contoh: Rp 18.000)', `menu.${key}.${i}.price`, m.price)}
+          <div class="field" style="align-self:end; padding-bottom:10px;">
+            <label><input type="checkbox" data-active-menu="${key}:${i}" ${m.active !== false ? 'checked' : ''} style="width:auto; margin-right:8px;">Tampilkan di website</label>
+          </div>
+        </div>
       </div>`).join('');
     bindInputs(el);
+    bindImageInputs(el, ()=>renderMenuList(key, containerId));
+    el.querySelectorAll('[data-active-menu]').forEach(chk=>{
+      chk.addEventListener('change', ()=>{
+        const [k,idx] = chk.dataset.activeMenu.split(':');
+        content.menu[k][parseInt(idx,10)].active = chk.checked;
+      });
+    });
     el.querySelectorAll('[data-remove-menu]').forEach(btn=>{
       btn.addEventListener('click', ()=>{
         const [k,idx] = btn.dataset.removeMenu.split(':');
@@ -623,11 +639,11 @@
 
   // ---------- add buttons for menu/customize/gallery/testi/faq ----------
   document.getElementById('addCoffeeBtn').addEventListener('click', ()=>{
-    content.menu.coffee.push({ name:"Menu Baru", tag:"" });
+    content.menu.coffee.push({ name:"Menu Baru", tag:"", price:"", image:"", active:true });
     renderMenuList('coffee','menuCoffeeList');
   });
   document.getElementById('addNonCoffeeBtn').addEventListener('click', ()=>{
-    content.menu.nonCoffee.push({ name:"Menu Baru", tag:"" });
+    content.menu.nonCoffee.push({ name:"Menu Baru", tag:"", price:"", image:"", active:true });
     renderMenuList('nonCoffee','menuNonCoffeeList');
   });
   document.getElementById('addCustomizeBtn').addEventListener('click', ()=>{
@@ -700,7 +716,6 @@
     renderPackagesIntro();
     renderPackages();
     renderMenuIntro();
-    renderMenuImage();
     renderMenuList('coffee','menuCoffeeList');
     renderMenuList('nonCoffee','menuNonCoffeeList');
     renderVisitShop();

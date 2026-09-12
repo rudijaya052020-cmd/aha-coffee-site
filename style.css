@@ -292,23 +292,26 @@ nav a:hover::after{ width:100%; }
 
 /* ---------- menu (printed menu card) ---------- */
 .menu{ padding:100px 0; }
-.menu-layout{ display:grid; grid-template-columns:0.85fr 1.15fr; gap:32px; align-items:stretch; }
-.menu-photo{ border:10px solid var(--leather); border-radius:6px; overflow:hidden; box-shadow:var(--shadow-deep); min-height:280px; }
-.menu-photo img{ width:100%; height:100%; object-fit:cover; }
-@media (max-width:880px){
-  .menu-layout{ grid-template-columns:1fr; }
-  .menu-photo{ max-width:380px; margin:0 auto; aspect-ratio:4/3; min-height:0; }
+.menu-category{ margin-top:26px; }
+.menu-category:first-of-type{ margin-top:40px; }
+.menu-category h3{ font-size:1.25rem; padding-bottom:12px; border-bottom:2px solid var(--copper); margin-bottom:20px; display:inline-block; }
+.menu-cards{ display:grid; grid-template-columns:repeat(auto-fill, minmax(200px,1fr)); gap:18px; }
+.menu-card{
+  background:linear-gradient(180deg,#FBF4E4,#EFE2C6);
+  border:1px solid var(--paper-line);
+  border-radius:var(--radius);
+  overflow:hidden;
+  box-shadow:var(--shadow-deep);
+  display:flex; flex-direction:column;
 }
-.menu-cols{ display:grid; grid-template-columns:1fr 1fr; gap:0; background:linear-gradient(180deg,#FBF4E4,#EFE2C6); border:1px solid var(--paper-line); border-radius:var(--radius); box-shadow:var(--shadow-deep); overflow:hidden; }
-.menu-col{ padding:34px 34px; }
-.menu-col:first-child{ border-right:1px dashed var(--paper-line); }
-.menu-col h3{ font-size:1.25rem; padding-bottom:14px; border-bottom:2px solid var(--copper); margin-bottom:6px; display:inline-block; }
-.menu-line{ display:flex; justify-content:space-between; align-items:baseline; padding:18px 0; border-bottom:1px dotted var(--paper-line); gap:20px; }
-.menu-line:last-child{ border-bottom:none; }
-.menu-line .name{ font-family:'Fraunces', serif; font-size:1.05rem; }
-.menu-line .tag{ font-size:0.8rem; color:var(--copper); white-space:nowrap; }
+.menu-card-photo{ aspect-ratio:4/3; overflow:hidden; background:var(--paper-line); }
+.menu-card-photo img{ width:100%; height:100%; object-fit:cover; }
+.menu-card-body{ padding:16px 18px; display:flex; flex-direction:column; gap:4px; }
+.menu-card-body .name{ font-family:'Fraunces', serif; font-size:1.02rem; }
+.menu-card-body .tag{ font-size:0.8rem; color:var(--copper); }
+.menu-card-price{ margin-top:8px; font-weight:600; font-size:0.92rem; }
 .menu-note{ margin-top:26px; font-size:0.86rem; color:var(--ink-soft); font-style:italic; text-align:center; }
-@media (max-width:720px){ .menu-cols{ grid-template-columns:1fr; } .menu-col:first-child{ border-right:none; border-bottom:1px dashed var(--paper-line); } }
+@media (max-width:720px){ .menu-cards{ grid-template-columns:repeat(2,1fr); } }
 
 /* kotak kontak kecil di bawah menu — ajak pengunjung tanya via WA/IG */
 .menu-contact{
@@ -350,6 +353,19 @@ nav a:hover::after{ width:100%; }
 .visit-details .row{ display:flex; gap:14px; align-items:baseline; font-size:0.95rem; color:var(--ink-soft); padding:10px 0; border-bottom:1px dashed var(--paper-line); }
 .visit-details .row strong{ color:var(--copper); font-family:'Fraunces',serif; font-size:0.85rem; min-width:80px; flex-shrink:0; }
 .visit-actions{ margin-top:26px; display:flex; gap:12px; flex-wrap:wrap; }
+.visit-map{ margin-top:22px; border-radius:var(--radius); overflow:hidden; box-shadow:var(--shadow-deep); border:1px solid var(--paper-line); }
+.visit-map iframe{ width:100%; height:260px; border:0; display:block; }
+
+.floating-wa{
+  position:fixed; right:20px; bottom:20px; z-index:50;
+  width:56px; height:56px; border-radius:50%;
+  background:#25D366; color:#fff;
+  display:flex; align-items:center; justify-content:center;
+  box-shadow:0 8px 20px rgba(0,0,0,0.3);
+  transition:transform 0.15s ease;
+}
+.floating-wa:hover{ transform:scale(1.08); }
+@media (max-width:600px){ .floating-wa{ right:14px; bottom:14px; width:50px; height:50px; } }
 @media (max-width:880px){
   .visit-shop .wrap{ grid-template-columns:1fr; }
   .visit-photo{ max-width:380px; margin:0 auto; }
