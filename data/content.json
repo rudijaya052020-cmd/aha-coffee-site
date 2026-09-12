@@ -115,7 +115,7 @@
   "menu": {
     "kicker": "Choose Your Favorite",
     "title": "Menu yang disukai banyak tamu.",
-    "image": "images/aha-brand-arabica-matcha.jpg",
+    "showPrices": true,
     "coffee": [
       {
         "name": "Kopi Susu Gula Aren",
@@ -149,7 +149,8 @@
       }
     ],
     "note": "Menu dapat disesuaikan dengan paket dan kebutuhan acara Anda.",
-    "contactNote": "Ada pertanyaan soal menu atau rasa? Tanya langsung lewat WhatsApp atau Instagram kami."
+    "contactNote": "Ada pertanyaan soal menu atau rasa? Tanya langsung lewat WhatsApp atau Instagram kami.",
+    "image": "images/aha-brand-arabica-matcha.jpg"
   },
   "customize": {
     "kicker": "Make It Yours",
@@ -172,6 +173,7 @@
     "address": "Isi alamat toko AHA Coffee di sini",
     "hours": "Setiap hari, 09.00 – 21.00 WIB",
     "mapUrl": "",
+    "mapEmbedUrl": "",
     "ctaMap": "Lihat Lokasi di Maps"
   },
   "galleryIntro": {
