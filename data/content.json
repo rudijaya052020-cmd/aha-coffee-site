@@ -9,11 +9,11 @@
     "tagSubtitle": "for Your Special Moment",
     "stats": [
       {
-        "value": "4",
+        "value": "3",
         "label": "Pilihan paket"
       },
       {
-        "value": "200+",
+        "value": "150+",
         "label": "Cup untuk Grand Package"
       },
       {
@@ -92,20 +92,6 @@
         "5. Pilihan setup tersedia"
       ],
       "cta": "Book This Package"
-    },
-    {
-      "name": "Grand",
-      "cups": "200+ Cups",
-      "desc": "Pengalaman coffee corner lengkap untuk perayaan besar Anda.",
-      "includes": [
-        "Full menu + request khusus",
-        "Booth premium + dekorasi",
-        "2–3 Barista",
-        "Custom penuh cup & signage",
-        "Setup & breakdown",
-        "Durasi & tim custom"
-      ],
-      "cta": "Request a Quote"
     }
   ],
   "menu": {
