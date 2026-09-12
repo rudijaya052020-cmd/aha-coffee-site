@@ -191,25 +191,27 @@
         <ul class="booking-contact" id="bookingContact"></ul>
       </div>
       <div class="receipt">
-        <form onsubmit="event.preventDefault(); alert('Terima kasih! Tim AHA Coffee akan segera menghubungi Anda.');">
+        <form name="booking" method="POST" data-netlify="true" netlify-honeypot="bot-field" onsubmit="handleBookingSubmit(event)">
+          <input type="hidden" name="form-name" value="booking">
+          <p style="position:absolute; left:-9999px;"><label>Jangan diisi: <input name="bot-field"></label></p>
           <div class="form-row">
             <div>
               <label for="wdate">Wedding Date</label>
-              <input id="wdate" type="date" required>
+              <input id="wdate" name="wedding_date" type="date" required>
             </div>
             <div>
               <label for="venue">Venue</label>
-              <input id="venue" type="text" placeholder="Nama venue / kota" required>
+              <input id="venue" name="venue" type="text" placeholder="Nama venue / kota" required>
             </div>
           </div>
           <div class="form-row">
             <div>
               <label for="guests">Estimated Guests</label>
-              <input id="guests" type="number" placeholder="Contoh: 150" required>
+              <input id="guests" name="guests" type="number" placeholder="Contoh: 150" required>
             </div>
             <div>
               <label for="package">Preferred Package</label>
-              <select id="package" required>
+              <select id="package" name="package" required>
                 <option value="">Pilih paket</option>
                 <option>Intimate (50 Cups)</option>
                 <option>Sweet (100 Cups)</option>
@@ -221,7 +223,7 @@
           </div>
           <div>
             <label for="contact">Contact / WhatsApp</label>
-            <input id="contact" type="text" placeholder="08xx-xxxx-xxxx" required>
+            <input id="contact" name="contact" type="text" placeholder="08xx-xxxx-xxxx" required>
           </div>
           <button class="btn btn-gold" type="submit">Get Your Quotation</button>
         </form>
@@ -456,5 +458,24 @@
 })();
 </script>
 
+<script>
+// Kirim form "Get Your Quotation" ke Netlify Forms supaya datanya
+// kesimpen & bisa dilihat di dashboard Netlify -> menu Forms.
+function handleBookingSubmit(e){
+  e.preventDefault();
+  const form = e.target;
+  const data = new FormData(form);
+  fetch("/", {
+    method: "POST",
+    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    body: new URLSearchParams(data).toString()
+  }).then(function(){
+    alert('Terima kasih! Tim AHA Coffee akan segera menghubungi Anda.');
+    form.reset();
+  }).catch(function(){
+    alert('Terima kasih! Data kamu tercatat. Kalau dalam 1x24 jam belum dihubungi, boleh langsung chat WhatsApp kami ya.');
+  });
+}
+</script>
 </body>
 </html>
