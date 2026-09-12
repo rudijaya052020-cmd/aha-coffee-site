@@ -281,7 +281,14 @@ nav a:hover::after{ width:100%; }
 .package-card .btn{ margin-top:24px; width:100%; justify-content:center; font-size:0.85rem; padding:13px 20px; }
 
 @media (max-width:980px){ .package-grid{ grid-template-columns:1fr 1fr; } }
-@media (max-width:620px){ .package-grid{ grid-template-columns:1fr; } }
+@media (max-width:620px){
+  .package-grid{
+    display:flex; grid-template-columns:none; gap:16px;
+    overflow-x:auto; scroll-snap-type:x mandatory;
+    padding:4px 4px 14px; -webkit-overflow-scrolling:touch;
+  }
+  .package-card{ flex:0 0 78vw; scroll-snap-align:center; }
+}
 
 /* ---------- menu (printed menu card) ---------- */
 .menu{ padding:100px 0; }
@@ -376,9 +383,16 @@ nav a:hover::after{ width:100%; }
 .g4{ grid-row:span 2; }
 .g6{ grid-column:span 2; }
 @media (max-width:720px){
-  .gallery-grid{ grid-template-columns:repeat(2,1fr); grid-auto-rows:140px; }
-  .g1{ grid-column:span 2; grid-row:span 1; }
-  .g4{ grid-row:span 1; }
+  .gallery-grid{
+    display:flex; grid-template-columns:none; gap:14px;
+    overflow-x:auto; scroll-snap-type:x mandatory;
+    padding-bottom:8px; -webkit-overflow-scrolling:touch;
+  }
+  .gallery-grid .g{
+    flex:0 0 72vw; height:220px;
+    scroll-snap-align:center;
+  }
+  .g1, .g4, .g6{ grid-column:unset; grid-row:unset; }
 }
 
 /* ---------- testimonials (polaroids pinned) ---------- */
@@ -404,7 +418,15 @@ nav a:hover::after{ width:100%; }
 .testi-card .frame{ aspect-ratio:4/5; overflow:hidden; }
 .testi-card .frame img{ width:100%; height:100%; object-fit:cover; }
 @media (max-width:980px){ .testi-grid{ grid-template-columns:repeat(2,1fr); } }
-@media (max-width:560px){ .testi-grid{ grid-template-columns:1fr; max-width:320px; margin:0 auto; } }
+@media (max-width:560px){
+  .testi-grid{
+    display:flex; grid-template-columns:none; gap:16px;
+    overflow-x:auto; scroll-snap-type:x mandatory;
+    padding:6px 4px 12px; max-width:100%; margin:0;
+    -webkit-overflow-scrolling:touch;
+  }
+  .testi-card{ flex:0 0 68vw; scroll-snap-align:center; }
+}
 
 /* ---------- steps ---------- */
 .steps{ padding:100px 0; background:var(--paper-deep); }
